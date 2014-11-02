@@ -38,6 +38,7 @@ Hex.Game.prototype = {
 			game.gameOver = true;
 			game.winner = winner;
 		});
+		this.getMoveForPlayer();
 	},
 
 	drawLevel: function() {
@@ -65,7 +66,7 @@ Hex.Game.prototype = {
 		this.drawLevel();
 
 		if (this.restartGameOnNextClick) {
-			this.initialisePlayers(this.numPlayers);
+			this.initialisePlayers(this.players);
 			this.restartGameOnNextClick = false;
 			this.gameOver = false;
 			return;
@@ -99,12 +100,21 @@ Hex.Game.prototype = {
 	},
 
 	showEndGameScreen: function() {
+		this.context.beginPath();
 		$("#hud").fadeOut();
-		this.context.fillStyle = '#000000';
+
+		var centerX = this.canvas.width / 2;
+		var centerY = this.canvas.height / 2;
+
+		this.context.fillStyle = 'rgba(1, 1, 1, 0.25)';
+		this.context.fillRect(centerX - 150, centerY - 30, 300, 60);
+		this.context.fill();
+
+		this.context.fillStyle = '#ffffff';
 		this.context.font = "bold 30pt Arial";
 		this.context.textAlign = "center";
 		this.context.textBaseline = "middle";
-		this.context.fillText("Player " + (this.winner + 1) + " wins", this.canvas.width / 2, this.canvas.height / 2);
+		this.context.fillText("Player " + (this.winner + 1) + " wins", centerX, centerY);
 	},
 
 	updatePlayerStatuses: function() {
