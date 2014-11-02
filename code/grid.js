@@ -4,11 +4,18 @@ Hex.Grid = function(hexSize, cols, rows) {
 	this.rows = rows;
 	this.coordMap = [];
 	this.defaultColour = '#ffffff';
+	this.defaultStrokeColour = '#000000';
 	this.hexColours = {};
+	this.hexStokeColours = {};
 }
 
 Hex.Grid.prototype = {
-	drawLevel: function(context){
+	drawLevel: function(context, hexDrawCallback){
+
+		// Any highlighted hexes are drawn last so the highlights
+		// are over the top of any previously drawn highlights
+		var delayedHexes = [];
+
 		for (var x = 0; x < this.cols; x++) {
 			for (var y = 0; y < this.rows; y++) {
 				var worldPos = this.gridToWorld(x, y);
@@ -19,9 +26,40 @@ Hex.Grid.prototype = {
 					worldY: worldPos.y
 				});
 
-				this.drawHex(context, worldPos.x, worldPos.y, this.hexSize, this.getColourOfHex(x, y));
+				var strokeColour = this.getStrokeColourOfHex(x,y);
+
+				var drawParams = [
+					context, 
+					worldPos.x, 
+					worldPos.y, 
+					this.hexSize, 
+					this.getColourOfHex(x, y),
+					strokeColour
+				];
+				var callbackParams = [
+					worldPos, 
+					{x: x, y: y}
+				];
+
+				if (strokeColour != this.defaultStrokeColour) {
+					delayedHexes.push({
+						"drawParams": drawParams,
+						"callbackParams": callbackParams
+					});
+				} else {
+					this.drawHex.apply(null, drawParams);
+					hexDrawCallback.apply(null, callbackParams);
+				}
 			}
 		}
+
+		for (var i in delayedHexes) {
+			var drawParams = delayedHexes[i]["drawParams"];
+			var callbackParams = delayedHexes[i]["callbackParams"];
+			this.drawHex.apply(null, drawParams);
+			hexDrawCallback.apply(null, callbackParams);	
+		}
+
 		context.stroke();
 	},
 
@@ -43,6 +81,20 @@ Hex.Grid.prototype = {
 		return this.defaultColour;
 	},
 
+	setStrokeColorOfHex: function(x, y, col) {
+		if (!this.hexStokeColours[x]) {
+			this.hexStokeColours[x] = {};
+		}
+		this.hexStokeColours[x][y] = col;
+	},
+
+	getStrokeColourOfHex: function(x,y) {
+		if (this.hexStokeColours[x] && this.hexStokeColours[x][y]) {
+			return this.hexStokeColours[x][y];
+		}
+		return this.defaultStrokeColour;
+	},
+
 	worldToGrid: function(x, y) {
 		var bestElem = {};
 		var closest = 99999;
@@ -62,7 +114,7 @@ Hex.Grid.prototype = {
  
 	gridToWorld: function(x, y) {
 		var xoffset = y % 2 == 0 ? this.hexSize : this.hexSize + (this.hexSize * 0.88);
-		xoffset -= 7;
+		xoffset -= 3;
 		return {
 			x: xoffset + (x * (this.hexSize * 1.75)),
 			y: this.hexSize + y * (this.hexSize * 1.5)
@@ -90,6 +142,13 @@ Hex.Grid.prototype = {
 			]);
 	},
 
+	areNeighbours: function(a, b) {
+		var neighbours = this.findNeighbours(a.x, a.y);
+		return neighbours.filter(function(elem){
+			return elem.x == b.x && elem.y == b.y;
+		}).length == 1;
+	},
+
 	removeNonValidEntries: function(entries) {
 		var cols = this.cols;
 		var rows = this.rows;
@@ -99,10 +158,17 @@ Hex.Grid.prototype = {
 		});
 	},
 
-	drawHex: function(context, center_x, center_y, size, colour) {
+	drawHex: function(context, center_x, center_y, size, colour, strokeColour) {
 		context.beginPath();
 		context.fillStyle = colour;
-		context.strokeStyle = '#000000';
+		context.strokeStyle = strokeColour;
+
+		if (strokeColour == '#FFFFFF') {
+			context.lineWidth = 6;
+		} else {
+			context.lineWidth = 4;
+		}
+
 		for(var i = 0; i <= 6; i++) {
 		    var angle = 2 * Math.PI / 6 * (i + 0.5);
 		    var x_i = center_x + size * Math.cos(angle);
