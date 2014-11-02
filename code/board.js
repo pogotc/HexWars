@@ -8,9 +8,15 @@ Hex.Board = function(grid, context){
 	this.context = context;
 
 	this.playerColours = {
-		0: '#FF0000',
-		1: '#0000FF',
-		2: '#55FF55'
+		0: '#FF0303',
+		1: '#0042FF',
+		2: '#1CE6B9',
+		3: '#20C000',
+		4: '#FFFC01',
+		5: '#FF8000',
+		6: '#540081',
+		7: '#E55BB0',
+		8: '#959697'
 	};
 
 	this.gameState = {};

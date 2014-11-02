@@ -1,0 +1,45 @@
+body {
+	font-family: helvetica, arial;
+}
+#player-status {
+	margin: 0px;
+	padding: 0px;
+}
+#player-status li{
+	border: 1px solid #fff;
+	float: left;
+	list-style-type: none;
+	margin: 0px 10px 0px;
+	padding: 5px;
+	width: 75px;
+}
+#player-status li span.playercolour {
+	display: block;
+	float: left;
+	margin: 0px 5px 0px 0px;
+	width: 20px;
+}
+#player-status li span.total {
+	float: left;
+	font-size: 18px;
+}
+#player-status li.current {
+	background: #eee;
+	border: 1px solid #333;
+	font-weight: bold;
+}
+canvas {
+	background: #f5f5f5;
+	padding: 10px;
+}
+button {
+	background: #f5f5f5;
+	border: 1px solid #888;
+	float: right;
+	font-size: 18px;
+	padding: 5px;
+}
+#instructions {
+	margin: 5px 0px;
+	width: 600px;
+}

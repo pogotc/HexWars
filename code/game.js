@@ -3,12 +3,12 @@ Hex = {};
 Hex.Game = function(canvas){
 	this.context = canvas.getContext('2d');
 	this.canvas = canvas;
-	this.hexSize = 50;
-	this.grid = new Hex.Grid(this.hexSize, 6, 6);	
+	this.hexSize = 40;
+	this.grid = new Hex.Grid(this.hexSize, 8, 6);	
 	this.mouse = new Hex.Mouse(this.canvas, this.grid);
 	this.board = new Hex.Board(this.grid, this.context);
 
-	this.numPlayers = 3;
+	this.numPlayers = 6;
 	this.gameOver = false;
 	this.restartGameOnNextClick = false;
 	this.winner = null;
@@ -88,9 +88,9 @@ Hex.Game.prototype = {
 			var playerCol = this.board.playerColours[i];
 			var playerLi = jQuery("<li></li>");
 
-			var playerMarker = "<span style='background: " + playerCol + "'>&nbsp;</span>";
+			var playerMarker = "<span class='playercolour' style='background: " + playerCol + "'>&nbsp;</span>";
 			playerLi.append(playerMarker);
-			playerLi.append(this.board.getTotalOccupiedHexesForPlayer(i));
+			playerLi.append("<span class='total'>" + this.board.getTotalOccupiedHexesForPlayer(i) + "</span>");
 
 			if (i == this.board.currentPlayer) {
 				playerLi.addClass("current");
