@@ -69,6 +69,36 @@ Hex.Grid.prototype = {
 		};
 	},
 
+	findNeighbours: function(x, y) {
+		return this.removeNonValidEntries(y % 2 == 0 ?
+			[
+				{x: x -1, y: y},
+				{x: x + 1, y: y},
+				{x: x, y: y + 1},
+				{x: x - 1, y: y + 1},
+				{x: x - 1, y: y - 1},
+				{x: x, y: y - 1}
+			]
+		:
+			[
+				{x: x -1, y: y},
+				{x: x + 1, y: y},
+				{x: x, y: y + 1},
+				{x: x + 1, y: y + 1},
+				{x: x + 1 , y: y - 1},
+				{x: x , y: y - 1}
+			]);
+	},
+
+	removeNonValidEntries: function(entries) {
+		var cols = this.cols;
+		var rows = this.rows;
+		return entries.filter(function(elem){
+			return elem.x >= 0 && elem.y >= 0 
+				&& elem.x < cols && elem.y < rows ;
+		});
+	},
+
 	drawHex: function(context, center_x, center_y, size, colour) {
 		context.beginPath();
 		context.fillStyle = colour;

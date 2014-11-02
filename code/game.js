@@ -29,6 +29,14 @@ Hex.Game.prototype = {
 
 	userClickedOnGridPos: function(x, y) {
 		this.grid.setColourOfHex(x, y, '#ff0000');
+
+		var neighbours = this.grid.findNeighbours(x, y);
+		for (var i in neighbours) {
+			this.grid.setColourOfHex(neighbours[i].x, neighbours[i].y, '#0000ff');	
+		}
+
 		this.drawLevel();
-	}
+	},
+
+
 }
