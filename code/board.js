@@ -143,7 +143,12 @@ Hex.Board.prototype = {
 	},
 
 	attackerWinsFight: function(attacker, target) {
-		return this.getScoreForGridPosition(attacker) > this.getScoreForGridPosition(target);
+		var attackerMax = this.getScoreForGridPosition(attacker) * 6;
+		var targetMax = this.getScoreForGridPosition(target) * 6;
+		var attackerScore = Math.ceil(Math.random() * attackerMax);
+		var targetScore = Math.ceil(Math.random() * targetMax);
+		console.log("Attacker: " + attackerScore + ", Target: " + targetScore);
+		return attackerScore > targetScore;
 	},
 
 	completeGame: function(winner){
