@@ -28,6 +28,7 @@ Hex.Board = function(grid, context){
 	this.totalPlayers = 0;
 	this.onGameCompleteCallback = null;
 	this.onAttackCallback = null;
+	this.maxReinforcements = 8;
 };
 
 Hex.Board.prototype = {
@@ -192,7 +193,7 @@ Hex.Board.prototype = {
 		while (totalReinforcements) {
 			var hexToReinforce = occupiedHexes[Math.floor(Math.random() * occupiedHexes.length)];
 			var currentScore = this.getScoreForGridPosition(hexToReinforce);
-			this.setOccupyer(hexToReinforce, this.currentPlayer, currentScore + 1);
+			this.setOccupyer(hexToReinforce, this.currentPlayer, Math.min(this.maxReinforcements, currentScore + 1));
 			totalReinforcements--;
 		}
 	},
