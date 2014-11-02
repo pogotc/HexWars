@@ -29,6 +29,7 @@ Hex.Game.prototype = {
 		$("#end-turn").click(function(){
 			board.endPlayerTurn();
 			game.updatePlayerStatuses();
+			game.drawLevel();
 		});
 
 		this.board.onAttack(function(){

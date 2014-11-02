@@ -44,6 +44,7 @@ Hex.Board.prototype = {
 		}
 
 		this.turnState = TURN_STATE_NONE;
+		this.currentPlayer = 0;
 	},
 
 	onGameComplete: function(callback) {
@@ -83,16 +84,20 @@ Hex.Board.prototype = {
 		return this.gameState[pos.x][pos.y].score;
 	},
 
-	getTotalOccupiedHexesForPlayer: function(playerId) {
-		var totalPlaces = 0;
+	getOccupiedHexesForPlayer: function(playerId) {
+		var occupiedHexes = [];
 		for (var x = 0; x < this.grid.cols; x++) {
 			for (var y = 0; y < this.grid.rows; y++) {
 				if (this.getOccupyer({x: x, y: y}) == playerId) {
-					totalPlaces++;
+					occupiedHexes.push({x: x, y: y});
 				}
 			}
 		}
-		return totalPlaces;
+		return occupiedHexes;
+	},
+
+	getTotalOccupiedHexesForPlayer: function(playerId) {
+		return this.getOccupiedHexesForPlayer(playerId).length;
 	},
 
 	playerHasWon: function(playerId) {
@@ -162,8 +167,28 @@ Hex.Board.prototype = {
 	},
 
 	endPlayerTurn: function() {
+		this.sendReinforcements();
+
+		do {
+			this.advancePlayerTurn();
+		} while (this.getTotalOccupiedHexesForPlayer(this.currentPlayer) == 0);
+	},
+
+	advancePlayerTurn: function() {
 		this.currentPlayer++;
 		this.currentPlayer = this.currentPlayer % this.totalPlayers;
+	},
+
+	sendReinforcements: function() {
+		var occupiedHexes = this.getOccupiedHexesForPlayer(this.currentPlayer);
+		var totalReinforcements = occupiedHexes.length;
+
+		while (totalReinforcements) {
+			var hexToReinforce = occupiedHexes[Math.floor(Math.random() * occupiedHexes.length)];
+			var currentScore = this.getScoreForGridPosition(hexToReinforce);
+			this.setOccupyer(hexToReinforce, this.currentPlayer, currentScore + 1);
+			totalReinforcements--;
+		}
 	},
 
 	selectAttackingHex: function(x, y) {
