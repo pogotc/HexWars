@@ -34,7 +34,8 @@ Hex.Board.prototype = {
 		while (gridPositions.length) { 
 			var gridPos = gridPositions.pop();
 			var player = Math.floor(Math.random() * numPlayers);
-			this.setOccupyer(gridPos, player);
+			var score = 1 + Math.floor(Math.random() * 6);
+			this.setOccupyer(gridPos, player, score);
 		}
 	},
 
@@ -50,11 +51,12 @@ Hex.Board.prototype = {
 		});
 	},
 
-	setOccupyer: function(pos, player) {
+	setOccupyer: function(pos, player, score) {
 		if (!this.gameState[pos.x]) {
 			this.gameState[pos.x] = {};
 		}
-		this.gameState[pos.x][pos.y] = {player: player, score: 3};
+
+		this.gameState[pos.x][pos.y] = {player: player, score: score};
 		this.grid.setColourOfHex(pos.x, pos.y, this.playerColours[player]);
 	},
 
@@ -70,9 +72,12 @@ Hex.Board.prototype = {
 		var attackingPlayer = this.getOccupyer(from);
 		var targetPlayer = this.getOccupyer(to);
 
-		console.log("ATTACK!!", from, to);
-		console.log(attackingPlayer + " attacking " + targetPlayer);
-		
+		if (this.attackerWinsFight(from, to)) {
+			this.setOccupyer(to, attackingPlayer, this.getScoreForGridPosition(from) - 1);
+			this.setOccupyer(from, attackingPlayer, 1);
+		} else {
+			this.setOccupyer(from, attackingPlayer, 1);
+		}
 	},
 
 	canAttack: function(from, to) {
@@ -81,7 +86,15 @@ Hex.Board.prototype = {
 		if (attackingPlayer == targetPlayer) {
 			return false;
 		}
+		if (this.getScoreForGridPosition(from) <= 1) {
+			return false;
+		}
+
 		return this.grid.areNeighbours(from, to);
+	},
+
+	attackerWinsFight: function(attacker, target) {
+		return this.getScoreForGridPosition(attacker) > this.getScoreForGridPosition(target);
 	},
 
 	userClickedOnGridPos: function(x, y) {
