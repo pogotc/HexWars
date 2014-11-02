@@ -1,6 +1,6 @@
 var TURN_STATE_NONE = 0;
 var TURN_STATE_SELECTED_ATTACKER = 1;
-var TURN_STATE_SELECTED_TARGET = 2;
+var TURN_STATE_GAME_OVER = 2;
 
 Hex.Board = function(grid, context){
 
@@ -18,12 +18,17 @@ Hex.Board = function(grid, context){
 	this.turnState = TURN_STATE_NONE;
 
 	this.attackingElem = null;
+	this.currentPlayer = 0;
+	this.totalPlayers = 0;
+	this.onGameCompleteCallback = null;
+	this.onAttackCallback = null;
 };
 
 Hex.Board.prototype = {
 
 	initPlayers: function(numPlayers) {
 		this.gameState = {};
+		this.totalPlayers = numPlayers;
 		var gridPositions = [];
 		for (var x = 0; x < this.grid.cols; x++) {
 			for (var y = 0; y < this.grid.rows; y++) {
@@ -37,6 +42,16 @@ Hex.Board.prototype = {
 			var score = 1 + Math.floor(Math.random() * 6);
 			this.setOccupyer(gridPos, player, score);
 		}
+
+		this.turnState = TURN_STATE_NONE;
+	},
+
+	onGameComplete: function(callback) {
+		this.onGameCompleteCallback = callback;
+	},
+
+	onAttack: function(callback) {
+		this.onAttackCallback = callback;
 	},
 
 	drawLevel: function() {
@@ -68,6 +83,25 @@ Hex.Board.prototype = {
 		return this.gameState[pos.x][pos.y].score;
 	},
 
+	getTotalOccupiedHexesForPlayer: function(playerId) {
+		var totalPlaces = 0;
+		for (var x = 0; x < this.grid.cols; x++) {
+			for (var y = 0; y < this.grid.rows; y++) {
+				if (this.getOccupyer({x: x, y: y}) == playerId) {
+					totalPlaces++;
+				}
+			}
+		}
+		return totalPlaces;
+	},
+
+	playerHasWon: function(playerId) {
+		var totalPlaces = this.grid.getTotalHexPlaces();
+		var placesForPlayer = this.getTotalOccupiedHexesForPlayer(playerId);
+
+		return totalPlaces == placesForPlayer;
+	},
+
 	attack: function(from, to) {
 		var attackingPlayer = this.getOccupyer(from);
 		var targetPlayer = this.getOccupyer(to);
@@ -77,6 +111,9 @@ Hex.Board.prototype = {
 			this.setOccupyer(from, attackingPlayer, 1);
 		} else {
 			this.setOccupyer(from, attackingPlayer, 1);
+		}
+		if (this.onAttackCallback) {
+			this.onAttackCallback();
 		}
 	},
 
@@ -97,8 +134,15 @@ Hex.Board.prototype = {
 		return this.getScoreForGridPosition(attacker) > this.getScoreForGridPosition(target);
 	},
 
+	completeGame: function(winner){
+		if (this.onGameCompleteCallback) {
+			this.onGameCompleteCallback(winner);
+		}
+		this.turnState = TURN_STATE_GAME_OVER;
+	},
+
 	userClickedOnGridPos: function(x, y) {
-		if (this.turnState == TURN_STATE_NONE) {
+		if (this.turnState == TURN_STATE_NONE && this.userCanSelectHexAsAttacker(x, y)) {
 			this.selectAttackingHex(x, y);
 
 		} else if (this.turnState == TURN_STATE_SELECTED_ATTACKER) {
@@ -109,14 +153,28 @@ Hex.Board.prototype = {
 				this.attack(this.attackingElem, {x: x, y: y});
 				this.turnState = TURN_STATE_NONE;
 				this.resetSelectedStateOfHex(this.attackingElem.x, this.attackingElem.y);
+
+				if (this.playerHasWon(this.currentPlayer)) {
+					this.completeGame(this.currentPlayer);
+				}
 			}
 		}
+	},
+
+	endPlayerTurn: function() {
+		this.currentPlayer++;
+		this.currentPlayer = this.currentPlayer % this.totalPlayers;
 	},
 
 	selectAttackingHex: function(x, y) {
 		this.attackingElem = {x: x, y: y};
 		this.grid.setStrokeColorOfHex(x, y, '#FFFFFF');
 		this.turnState = TURN_STATE_SELECTED_ATTACKER;
+	},
+
+	userCanSelectHexAsAttacker: function(x, y) {
+		return this.currentPlayer ==
+					this.getOccupyer({x: x, y: y});
 	},
 
 	resetSelectedStateOfHex: function(x, y) {

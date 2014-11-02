@@ -2,9 +2,26 @@
 <html>
 <head>
 	<title>Hex</title>
+	<style type="text/css">
+		#hud {
+			float: right;
+		}
+		#player-status li{
+			list-style-type: none;
+			padding: 5px;
+		}
+		#player-status li.current {
+			font-weight: bold;
+		}
+	</style>
 </head>
 <body>
-	<div id="debug">&nbsp;</div>
+
+	<div id="hud">
+		<ul id="player-status">&nbsp;</ul>
+		<button id="end-turn">End Turn</button>
+	</div>
+
 	<canvas id="canvas" width="800" height="600">
 		<p>Your browser does not support the canvas element.</p>
 	</canvas>

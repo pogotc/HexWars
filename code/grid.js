@@ -95,6 +95,10 @@ Hex.Grid.prototype = {
 		return this.defaultStrokeColour;
 	},
 
+	getTotalHexPlaces: function() {
+		return this.cols * this.rows;
+	},
+
 	worldToGrid: function(x, y) {
 		var bestElem = {};
 		var closest = 99999;
