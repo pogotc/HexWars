@@ -1,14 +1,14 @@
-Hex = {};
 
-Hex.Game = function(canvas){
+Hex.Game = function(canvas, cols, rows){
 	this.context = canvas.getContext('2d');
 	this.canvas = canvas;
 	this.hexSize = 40;
-	this.grid = new Hex.Grid(this.hexSize, 8, 6);	
+	this.grid = new Hex.Grid(this.hexSize, cols, rows);	
 	this.mouse = new Hex.Mouse(this.canvas, this.grid);
 	this.board = new Hex.Board(this.grid, this.context);
 
-	this.numPlayers = 6;
+	this.players = null;
+	this.numPlayers = 0
 	this.gameOver = false;
 	this.restartGameOnNextClick = false;
 	this.winner = null;
@@ -17,8 +17,8 @@ Hex.Game = function(canvas){
 
 Hex.Game.prototype = {
 
-	init: function() {
-		this.initialisePlayers();
+	init: function(players) {
+		this.initialisePlayers(players);
 
 		var game = this;
 		var board = this.board;
@@ -27,9 +27,7 @@ Hex.Game.prototype = {
 		});
 
 		$("#end-turn").click(function(){
-			board.endPlayerTurn();
-			game.updatePlayerStatuses();
-			game.drawLevel();
+			game.endTurn();
 		});
 
 		this.board.onAttack(function(){
@@ -49,7 +47,9 @@ Hex.Game.prototype = {
 		this.board.drawLevel(this.context);
 	},
 
-	initialisePlayers: function() {
+	initialisePlayers: function(players) {
+		this.numPlayers = players.length;
+		this.players = players;
 		this.board.initPlayers(this.numPlayers);
 		$("#hud").show();
 		this.drawLevel();
@@ -57,6 +57,10 @@ Hex.Game.prototype = {
 	},
 
 	userClickedOnGridPos: function(x, y) {
+		if (!this.acceptClicksFromCurrentUser()) {
+			return false;
+		}
+
 		this.board.userClickedOnGridPos(x, y);
 		this.drawLevel();
 
@@ -71,6 +75,27 @@ Hex.Game.prototype = {
 			this.showEndGameScreen();
 			this.restartGameOnNextClick = true;
 		}
+	},
+
+	endTurn: function(){
+		this.board.endPlayerTurn();
+		this.updatePlayerStatuses();
+		this.drawLevel();
+		this.getMoveForPlayer();
+	},
+
+	getMoveForPlayer: function() {
+		if (!this.getCurrentPlayer().isHuman) {
+			this.getCurrentPlayer().takeTurn(this, this.board);
+		}
+	},
+
+	acceptClicksFromCurrentUser: function() {
+		return this.getCurrentPlayer().isHuman;
+	},
+
+	getCurrentPlayer: function() {
+		return this.players[this.board.currentPlayer];
 	},
 
 	showEndGameScreen: function() {

@@ -23,15 +23,19 @@
 	</div>
 
 	<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+	<script type="text/javascript" src="code/application.js"></script>
 	<script type="text/javascript" src="code/game.js"></script>
+	<script type="text/javascript" src="code/players/player.js"></script>
+	<script type="text/javascript" src="code/players/human.js"></script>
+	<script type="text/javascript" src="code/players/cpu.js"></script>
 	<script type="text/javascript" src="code/mouse.js"></script>
 	<script type="text/javascript" src="code/grid.js"></script>
 	<script type="text/javascript" src="code/board.js"></script>
 
 	<script type="text/javascript">
 		$(function(){
-			var game = new Hex.Game(document.getElementById('canvas'));
-			game.init();
+			var app = new Hex.Application(document.getElementById('canvas'));
+			app.init();
 		});
 	</script>
 </body>
