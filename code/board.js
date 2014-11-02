@@ -70,14 +70,18 @@ Hex.Board.prototype = {
 		var attackingPlayer = this.getOccupyer(from);
 		var targetPlayer = this.getOccupyer(to);
 
+		console.log("ATTACK!!", from, to);
+		console.log(attackingPlayer + " attacking " + targetPlayer);
+		
+	},
+
+	canAttack: function(from, to) {
+		var attackingPlayer = this.getOccupyer(from);
+		var targetPlayer = this.getOccupyer(to);
 		if (attackingPlayer == targetPlayer) {
-			this.turnState == TURN_STATE_SELECTED_ATTACKER
-		} else {
-			console.log("ATTACK!!", from, to);
-			console.log(attackingPlayer + " attacking " + targetPlayer);
-			this.turnState = TURN_STATE_NONE;
-			this.resetSelectedStateOfHex(from.x, from.y);
+			return false;
 		}
+		return this.grid.areNeighbours(from, to);
 	},
 
 	userClickedOnGridPos: function(x, y) {
@@ -88,9 +92,10 @@ Hex.Board.prototype = {
 			if (x == this.attackingElem.x && y == this.attackingElem.y) {
 				this.resetSelectedStateOfHex(x, y);
 				this.turnState = TURN_STATE_NONE;
-			} else if(this.grid.areNeighbours(this.attackingElem, {x: x, y: y})) {
+			} else if(this.canAttack(this.attackingElem, {x: x, y: y})) {
 				this.attack(this.attackingElem, {x: x, y: y});
-				// this.turnState = TURN_STATE_SELECTED_TARGET;
+				this.turnState = TURN_STATE_NONE;
+				this.resetSelectedStateOfHex(this.attackingElem.x, this.attackingElem.y);
 			}
 		}
 	},
